@@ -20,7 +20,7 @@ fn main() {
         let r: f64 = x as f64 / (image_width - 1) as f64;
         let g: f64 = y as f64 / (image_height - 1) as f64;
         let b: f64 = 0.0;
-        let color = Color { x: r, y: g, z: b };
+        let color = Color::new([r, g, b]);
 
         write_color(color, pixel)
     }
