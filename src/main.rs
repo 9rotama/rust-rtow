@@ -1,7 +1,9 @@
 mod color;
+mod hittable;
 mod point3;
 mod ray;
 mod vec3;
+mod sphere;
 
 use std::time;
 use vec3::unit_vector;
