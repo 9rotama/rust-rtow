@@ -1,9 +1,26 @@
-use crate::{point3::Point3, ray::Ray, vec3::Vec3};
+use crate::{
+    point3::Point3,
+    ray::Ray,
+    vec3::{dot, Vec3},
+};
 
+#[derive(Clone)]
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
+    pub front_face: bool,
+}
+
+impl HitRecord {
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: &Vec3) {
+        self.front_face = dot(&(r.direction()), outward_normal) < 0.0;
+        self.normal = if self.front_face {
+            outward_normal.clone()
+        } else {
+            -1.0 * outward_normal.clone()
+        }
+    }
 }
 
 pub trait Hittable {
