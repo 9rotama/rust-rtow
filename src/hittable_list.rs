@@ -9,18 +9,8 @@ pub struct HittableList {
     pub objects: Vec<Box<dyn Hittable>>,
 }
 
-impl HittableList {
-    pub fn new(&self) -> Self {
-        HittableList {
-            objects: Vec::new(),
-        }
-    }
-
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
-        self.objects.push(object);
-    }
-
-    pub fn hit(&self, r: &Ray, ray_tmin: f64, ray_tmax: f64, rec: &mut HitRecord) -> bool {
+impl Hittable for HittableList {
+    fn hit(&self, r: &Ray, ray_tmin: f64, ray_tmax: f64, rec: &mut HitRecord) -> bool {
         let mut temp_rec: HitRecord = HitRecord {
             p: Point3::new([0.0, 0.0, 0.0]),
             normal: Vec3::new([0.0, 0.0, 0.0]),
@@ -38,5 +28,17 @@ impl HittableList {
             }
         }
         hit_anything
+    }
+}
+
+impl HittableList {
+    pub fn new() -> Self {
+        HittableList {
+            objects: Vec::<Box<dyn Hittable>>::new(),
+        }
+    }
+
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
     }
 }

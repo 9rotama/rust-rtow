@@ -7,29 +7,18 @@ mod rtweekend;
 mod sphere;
 mod vec3;
 
-use std::time;
+use hittable::{HitRecord, Hittable};
+use hittable_list::HittableList;
+use sphere::Sphere;
+use std::{f64::INFINITY, time};
 use vec3::unit_vector;
 
 use {color::write_color, color::Color, point3::Point3, ray::Ray, vec3::dot, vec3::Vec3};
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = center.clone() - r.origin();
-    let a = r.direction().length_squared();
-    let h = dot(&(r.direction()), &oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / a
-    }
-}
-
-fn ray_color(r: &Ray) -> Color {
-    let t = hit_sphere(&Point3::new([0.0, 0.0, -1.0]), 0.5, r);
-    if t > 0.0 {
-        let n = unit_vector(&(r.at(t) - Vec3::new([0.0, 0.0, -1.0])));
-        return 0.5 * Color::new([n.x() + 1.0, n.y() + 1.0, n.z() + 1.0]);
+fn ray_color(r: &Ray, world: &(dyn Hittable)) -> Color {
+    let mut rec = HitRecord::new();
+    if world.hit(r, 0.0, INFINITY, &mut rec) {
+        return 0.5 * (rec.normal + Color::new([1.0, 1.0, 1.0]));
     }
     let unit_direction = unit_vector(&r.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
@@ -47,6 +36,13 @@ fn main() {
     let viewport_height = 2.0;
     let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
     let camera_center = Point3::new([0.0, 0.0, 0.0]);
+
+    // world
+
+    let mut world = HittableList::new();
+
+    world.add(Box::new(Sphere::new(Point3::new([0.0, 0.0, -1.0]), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new([0.0, -100.5, -1.0]), 100.0)));
 
     // viewport
     let viewport_u = Vec3::new([viewport_width, 0.0, 0.0]);
@@ -76,7 +72,7 @@ fn main() {
             + (y as f64 * pixel_delta_v.clone());
         let ray_direction = pixel_center - camera_center.clone();
 
-        let pixel_color = ray_color(&Ray::new(camera_center.clone(), ray_direction));
+        let pixel_color = ray_color(&Ray::new(camera_center.clone(), ray_direction), &world);
 
         write_color(pixel_color, pixel)
     }
